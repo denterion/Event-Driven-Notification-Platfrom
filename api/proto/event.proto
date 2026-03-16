@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package event;
+
+option go_package = "ProjectNotification/api/proto;proto";
+
+service EventService{
+    rpc SendEvent (EventRequest) returns (EventResponse);
+}
+
+message EventRequest{
+    string event_type = 1;
+    string user_id = 2;
+    string email = 3;
+    string payload = 4;
+}
+
+message EventResponse{
+    string status = 1;
+}
