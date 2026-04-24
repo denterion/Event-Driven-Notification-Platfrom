@@ -2,7 +2,10 @@ package kafka
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+
+	"ProjectNotification/internal/models"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -20,18 +23,22 @@ func NewProducer(brokerAddress, topic string) *Producer {
 	}
 }
 
-func (p *Producer) Send(ctx context.Context, key, value string) error {
-	msg := kafka.Message{
-		Key:   []byte(key),
-		Value: []byte(value),
-	}
+func (p *Producer) Send(ctx context.Context, event models.Event) error {
 
-	err := p.Writer.WriteMessages(ctx, msg)
+	data, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+	msg := kafka.Message{
+		Key:   []byte(event.UserID),
+		Value: data,
+	}
+	err = p.Writer.WriteMessages(ctx, msg)
 	if err != nil {
 		log.Println("failed to write message:", err)
 		return err
 	}
-	log.Println("event sent to Kafka:", string(value))
+	log.Println("event sent to Kafka:", string(data))
 	return nil
 }
 

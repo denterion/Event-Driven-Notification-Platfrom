@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-func main(){
+func main() {
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
-	if err != nil{
+	if err != nil {
 		log.Fatal("connection error:", err)
 	}
 	defer conn.Close()
@@ -24,12 +24,12 @@ func main(){
 
 	response, err := client.SendEvent(ctx, &pb.EventRequest{
 		EventType: "user_registered",
-		UserId: "123",
-		Email: "test@mail.com",
-		Payload: "new user signup",
+		UserId:    "123",
+		Email:     "test@mail.com",
+		Payload:   "new user signup",
 	})
 
-	if err != nil{
+	if err != nil {
 		log.Fatal("SendEvent error", err)
 	}
 

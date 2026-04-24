@@ -4,9 +4,13 @@ import (
 	"context"
 	"log"
 	"net"
+	"os"
+	"time"
 
 	pb "ProjectNotification/api/proto"
+	"ProjectNotification/internal/config"
 	"ProjectNotification/internal/kafka"
+	"ProjectNotification/internal/models"
 
 	"google.golang.org/grpc"
 )
@@ -20,8 +24,17 @@ func (s *server) SendEvent(ctx context.Context, req *pb.EventRequest) (*pb.Event
 
 	log.Println("event received: ", req.EventType, req.UserId)
 
-	err := s.producer.Send(ctx, req.UserId, req.Payload)
-	if err != nil{
+	event := models.Event{
+		EventType: req.EventType,
+		UserID:    req.UserId,
+		Timestamp: time.Now().Unix(),
+		Payload: models.UserRegisteredPayload{
+			Email: req.Email,
+		},
+	}
+
+	err := s.producer.Send(ctx, event)
+	if err != nil {
 		return nil, err
 	}
 
@@ -31,13 +44,17 @@ func (s *server) SendEvent(ctx context.Context, req *pb.EventRequest) (*pb.Event
 }
 
 func main() {
+	config.OverloadDotEnv()
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	producer := kafka.NewProducer("localhost:9092", "notifications.events")
+	broker := getEnv("KAFKA_BROKER", "localhost:9092")
+	topic := getEnv("KAFKA_TOPIC", "notifications.events")
+
+	producer := kafka.NewProducer(broker, topic)
 	defer producer.Close()
 
 	grpcServer := grpc.NewServer()
@@ -49,4 +66,11 @@ func main() {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func getEnv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }
