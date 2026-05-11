@@ -56,7 +56,6 @@ func (s *Sender) SendMessage(ctx context.Context, text string) error {
 
 	resp, err := s.client.Do(req)
 	if err != nil {
-		// Avoid leaking token via error strings that might include URL.
 		return fmt.Errorf("telegram sendMessage request failed: %T", err)
 	}
 	defer resp.Body.Close()
@@ -66,4 +65,3 @@ func (s *Sender) SendMessage(ctx context.Context, text string) error {
 	}
 	return nil
 }
-

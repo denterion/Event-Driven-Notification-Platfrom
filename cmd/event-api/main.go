@@ -28,9 +28,7 @@ func (s *server) SendEvent(ctx context.Context, req *pb.EventRequest) (*pb.Event
 		EventType: req.EventType,
 		UserID:    req.UserId,
 		Timestamp: time.Now().Unix(),
-		Payload: models.UserRegisteredPayload{
-			Email: req.Email,
-		},
+		Payload:   buildPayload(req),
 	}
 
 	err := s.producer.Send(ctx, event)
@@ -41,6 +39,37 @@ func (s *server) SendEvent(ctx context.Context, req *pb.EventRequest) (*pb.Event
 	return &pb.EventResponse{
 		Status: "event accepted",
 	}, nil
+}
+
+func buildPayload(req *pb.EventRequest) interface{} {
+	switch req.EventType {
+	case "user_registered":
+		return models.UserRegisteredPayload{
+			Email: req.Email,
+		}
+	case "order_created":
+		return models.OrderCreatedPayload{
+			OrderID: req.Payload,
+			Email:   req.Email,
+			Details: "new order created",
+		}
+	case "payment_succeeded":
+		return models.PaymentSucceededPayload{
+			OrderID: req.Payload,
+			Details: "payment completed",
+		}
+	case "payment_failed":
+		return models.PaymentFailedPayload{
+			OrderID: req.Payload,
+			Reason:  "payment was declined",
+		}
+	case "password_reset_requested":
+		return models.PasswordResetRequestedPayload{
+			Email: req.Email,
+		}
+	default:
+		return req.Payload
+	}
 }
 
 func main() {

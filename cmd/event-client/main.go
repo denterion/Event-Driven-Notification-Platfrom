@@ -19,19 +19,46 @@ func main() {
 
 	client := pb.NewEventServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	response, err := client.SendEvent(ctx, &pb.EventRequest{
-		EventType: "user_registered",
-		UserId:    "123",
-		Email:     "test@mail.com",
-		Payload:   "new user signup",
-	})
-
-	if err != nil {
-		log.Fatal("SendEvent error", err)
+	events := []*pb.EventRequest{
+		{
+			EventType: "user_registered",
+			UserId:    "123",
+			Email:     "test@mail.com",
+			Payload:   "new user signup",
+		},
+		{
+			EventType: "order_created",
+			UserId:    "123",
+			Email:     "test@mail.com",
+			Payload:   "ORD-1001",
+		},
+		{
+			EventType: "payment_succeeded",
+			UserId:    "123",
+			Email:     "test@mail.com",
+			Payload:   "ORD-1001",
+		},
+		{
+			EventType: "payment_failed",
+			UserId:    "456",
+			Email:     "buyer@mail.com",
+			Payload:   "ORD-1002",
+		},
+		{
+			EventType: "password_reset_requested",
+			UserId:    "789",
+			Email:     "reset@mail.com",
+			Payload:   "password reset",
+		},
 	}
 
-	log.Println("Server response:", response.Status)
+	for _, event := range events {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		response, err := client.SendEvent(ctx, event)
+		cancel()
+		if err != nil {
+			log.Fatal("SendEvent error", err)
+		}
+		log.Println(event.EventType, ":", response.Status)
+	}
 }

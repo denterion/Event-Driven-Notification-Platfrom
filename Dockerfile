@@ -7,17 +7,13 @@ RUN go mod download
 
 COPY . .
 
-# Select which cmd/* to build (default: event-api)
 ARG APP=event-api
-RUN go build -o /out/app ./cmd/${APP}
+RUN CGO_ENABLED=0 go build -o /out/app ./cmd/${APP}
 
-FROM debian:bookworm-slim
-
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+FROM scratch
 
 WORKDIR /app
 COPY --from=builder /out/app ./app
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD ["./app"]

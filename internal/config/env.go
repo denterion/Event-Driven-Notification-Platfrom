@@ -7,16 +7,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// OverloadDotEnv searches upward from the current working directory for a
-// `.env` file and overloads environment variables from it.
-//
-// This avoids "it works only when I run from repo root" issues on Windows.
 func OverloadDotEnv() {
 	if path, ok := findUp(".env"); ok {
 		_ = godotenv.Overload(path)
 		return
 	}
-	// Fallback: try default behavior (current directory).
 	_ = godotenv.Overload()
 }
 

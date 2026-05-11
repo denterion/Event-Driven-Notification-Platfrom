@@ -31,7 +31,6 @@ func (c *Client) Ping(ctx context.Context) error {
 	return c.rdb.Ping(ctx).Err()
 }
 
-// SetNX sets key if it does not exist, with TTL.
 func (c *Client) SetNX(ctx context.Context, key string, value interface{}, ttl time.Duration) (bool, error) {
 	return c.rdb.SetNX(ctx, key, value, ttl).Result()
 }
@@ -51,4 +50,3 @@ func getenvInt(key string, fallback int) int {
 	}
 	return fallback
 }
-

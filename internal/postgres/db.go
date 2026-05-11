@@ -20,9 +20,6 @@ func getEnv(key, fallback string) string {
 }
 
 func NewDB() *sql.DB {
-	// For local development, prefer values from `.env` even if the
-	// shell already has DB_* variables set from an older session.
-	// Also make loading resilient to running from a subdirectory.
 	config.OverloadDotEnv()
 
 	host := getEnv("DB_HOST", "localhost")
@@ -44,8 +41,6 @@ func NewDB() *sql.DB {
 		log.Fatal("db open error:", err)
 	}
 
-	// In docker-compose, Postgres may take a few seconds to accept connections.
-	// Retry a short period to avoid crashing dependent services on startup.
 	var pingErr error
 	for i := 0; i < 15; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
@@ -74,7 +69,6 @@ func NewDB() *sql.DB {
 }
 
 func ensureNotificationTable(db *sql.DB) error {
-	// Note: we keep this minimal (no migrations framework yet).
 	_, err := db.Exec(`
 CREATE TABLE IF NOT EXISTS notification (
   id TEXT PRIMARY KEY,

@@ -10,3 +10,23 @@ type Event struct {
 type UserRegisteredPayload struct {
 	Email string `json:"email"`
 }
+
+type OrderCreatedPayload struct {
+	OrderID string `json:"order_id"`
+	Email   string `json:"email"`
+	Details string `json:"details"`
+}
+
+type PaymentSucceededPayload struct {
+	OrderID string `json:"order_id"`
+	Details string `json:"details"`
+}
+
+type PaymentFailedPayload struct {
+	OrderID string `json:"order_id"`
+	Reason  string `json:"reason"`
+}
+
+type PasswordResetRequestedPayload struct {
+	Email string `json:"email"`
+}
